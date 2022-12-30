@@ -550,19 +550,19 @@ volumes:
   downloads_usenet_pcie:
     driver_opts:
       type: "nfs"
-      o: "addr=192.168.0.211,nolock,soft,rw"
+      o: "addr=192.168.0.235,nolock,soft,rw"
       device: ":/data_pcie/share/downloads"
 
   downloads_jdownload:
     driver_opts:
       type: "nfs"
-      o: "addr=192.168.0.211,nolock,soft,rw"
+      o: "addr=192.168.0.235,nolock,soft,rw"
       device: ":/data_hdd/share/downloads/jdownload/"
 
   downloads_qbit:
     driver_opts:
       type: "nfs"
-      o: "addr=192.168.0.211,nolock,soft,rw"
+      o: "addr=192.168.0.235,nolock,soft,rw"
       device: ":/data_hdd/share/downloads/qbittorrent/"
 
   books:
