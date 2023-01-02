@@ -361,6 +361,7 @@ services:
     container_name: "sonarr"
     volumes:
         - "/dev/rtc:/dev/rtc:ro"
+        - "/dockerpipe:/hostpipe"
         - "/mnt/config/p-docker/sonarrv3/:/config"
         - type: volume
           source: downloads_qbit
@@ -394,6 +395,7 @@ services:
     image: "linuxserver/radarr"
     container_name: "radarr_all"
     volumes:
+        - "/dockerpipe:/hostpipe"
         - "/mnt/config/p-docker/radarr_all/:/config"
         - type: volume
           source: downloads_qbit
