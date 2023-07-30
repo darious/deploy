@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  uptimekuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptimekuma
+    ports:
+      - "3001:3001"
+    volumes:
+      - /mnt/docker/uptime-kuma:/app/data
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+ 
