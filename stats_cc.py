@@ -92,16 +92,19 @@ while True:
     HOST = subprocess.check_output(cmd, shell = True ).decode("utf-8")
     cmd = "hostname -I | cut -d\' \' -f1"
     IP = subprocess.check_output(cmd, shell = True ).decode("utf-8")
+    cmd = "awk '{printf \"%d days %02d:%02d:%02d\\n\",($1/86400),($1%86400/3600),(($1%3600)/60),($1%60)}' /proc/uptime"
+    Uptime = subprocess.check_output(cmd, shell = True ).decode("utf-8")
+
     cmd = "top -bn1 | grep load | awk '{printf \"CPU : %.2f\", $(NF-2)}'"
     CPU = subprocess.check_output(cmd, shell = True ).decode("utf-8")
-    cmd = "free -m | awk 'NR==2{printf \"Mem : %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
+    cmd = "free -m | awk 'NR==2{printf \"Mem : %.0f%%\", $3*100/$2 }'"
     MemUsage = subprocess.check_output(cmd, shell = True ).decode("utf-8")
 
     # Write two lines of text.
     draw.text((x, top),       "Host: " + str(HOST),  font=font, fill=255)
-    draw.text((x, top+8),       "IP  : " + str(IP),  font=font, fill=255)
-    draw.text((x, top+16),     str(CPU), font=font, fill=255)
-    draw.text((x, top+24),    str(MemUsage),  font=font, fill=255)
+    draw.text((x, top+8),     "IP  : " + str(IP),  font=font, fill=255)
+    draw.text((x, top+16),    "Up  : " + str(Uptime), font=font, fill=255)
+    draw.text((x, top+24),    str(CPU) + " " + str(MemUsage),  font=font, fill=255)
 
     # Display image.
     disp.image(image)
