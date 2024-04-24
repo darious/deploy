@@ -47,7 +47,7 @@ services:
       - NET_ADMIN
     environment:
       - VPNSP=ipvanish
-      - OPENVPN_USER=darious
+      - OPENVPN_USER=chris@darious.co.uk
       - OPENVPN_PASSWORD=xxxxxxxx
       - COUNTRY=United Kingdom
       - EXTRA_SUBNETS=192.168.0.0/24
@@ -94,25 +94,6 @@ services:
       - /mnt/config/p-docker/guacamole:/config
     ports:
         - "8085:8080"
-    networks:
-      - internal
-      - web
-    restart: unless-stopped
-
-
-
-  heimdall:
-    image: lscr.io/linuxserver/heimdall:latest
-    container_name: heimdall
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-    volumes:
-      - /mnt/config/p-docker/heimdall:/config
-    ports:
-      - 8001:80
-      - 4431:443
     networks:
       - internal
       - web
@@ -274,20 +255,6 @@ services:
       - internal
       - web
     restart: unless-stopped
-
-
-  gerbera:
-    image: gerbera/gerbera
-    container_name: gerbera
-    network_mode: host
-    volumes:
-      - /mnt/config/p-docker/gerbera/:/var/run/gerbera
-      - type: volume
-        source: music_lossless
-        target: /content:ro
-        volume:
-          nocopy: true
-    network_mode: host
 
 
 
@@ -538,7 +505,6 @@ services:
         volume:
           nocopy: true
     restart: unless-stopped
-
 
 
 
