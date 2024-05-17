@@ -1,5 +1,3 @@
-version: '3'
-
 services:
 
 
@@ -45,11 +43,18 @@ services:
     container_name: ip-vanish
     cap_add:
       - NET_ADMIN
+    # environment:
+    #   - VPNSP=ipvanish
+    #   - OPENVPN_USER=chris@darious.co.uk
+    #   - OPENVPN_PASSWORD=xxxxxxxx
+    #   - COUNTRY=United Kingdom
+    #   - EXTRA_SUBNETS=192.168.0.0/24
     environment:
-      - VPNSP=ipvanish
-      - OPENVPN_USER=chris@darious.co.uk
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn # or wireguard
+      - OPENVPN_USER=xxxxxxxx
       - OPENVPN_PASSWORD=xxxxxxxx
-      - COUNTRY=United Kingdom
+      - SERVER_COUNTRIES=United Kingdom
       - EXTRA_SUBNETS=192.168.0.0/24
     ports:
       - 9091:9091
@@ -65,6 +70,10 @@ services:
       - internal
       - web
     restart: unless-stopped
+
+
+
+
 
 
 
@@ -176,9 +185,6 @@ services:
     volumes:
       - /mnt/config/p-docker/xteve:/home/xteve/conf
     restart: unless-stopped
-    networks:
-      - internal
-      - web
     depends_on:
       - gluetun
     network_mode: service:gluetun
@@ -269,9 +275,6 @@ services:
     volumes:
       - /mnt/config/p-docker/prowlarr/:/config
     restart: unless-stopped
-    networks:
-      - internal
-      - web
     network_mode: service:gluetun
 
 
@@ -316,9 +319,6 @@ services:
         volume:
           nocopy: true
     restart: unless-stopped
-    networks:
-      - internal
-      - web
     network_mode: service:gluetun
 
 
