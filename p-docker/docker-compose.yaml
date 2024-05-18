@@ -72,9 +72,29 @@ services:
     restart: unless-stopped
 
 
-
-
-
+  tailon:
+    image: gvalkov/tailon
+    container_name: tailon
+    ports:
+      - "6970:8080"  # Expose Tailon web interface on port 8080
+    volumes:
+      - /mnt/config/p-docker/lazylib/log:/lazylib_all_logs
+      - /mnt/config/p-docker/prowlarr/logs:/prowlarr_all_logs
+      - /mnt/config/p-docker/radarr_all/logs:/radarr_all_logs
+      - /mnt/config/p-docker/sabnzbd/logs:/sabnzbd_all_logs
+      - /mnt/config/p-docker/sonarrv3/logs:/sonarrv3_logs
+    command: >
+      alias=LazyLibrarian,/lazylib_all_logs/lazylibrarian.log
+      alias=Prowlarr,/prowlarr_all_logs/prowlarr.txt
+      alias=Radarr,/radarr_all_logs/radarr.txt
+      alias=RadarrEncode,/radarr_all_logs/encode_and_upload.log
+      alias=Sabnzbd,/sabnzbd_all_logs/sabnzbd.log
+      alias=Sonarr,/sonarrv3_logs/sonarr.txt
+      alias=SonarrEncode,/sonarrv3_logs/encode_and_upload.log
+    environment:
+      - TAILON_PORT=8080  # Port Tailon will run on (default is 8080)
+      - TAILON_USERS=*  # Users allowed to access Tailon (default is "*", meaning everyone)
+    restart: unless-stopped
 
 
   librespeed:
