@@ -86,3 +86,12 @@ if [ -f '/root/google-cloud-sdk/path.zsh.inc' ]; then . '/root/google-cloud-sdk/
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/root/google-cloud-sdk/completion.zsh.inc' ]; then . '/root/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Keybindings 
+# Bind Ctrl+Left to backward-word
+bindkey "^[[1;5D" backward-word
+bindkey "^[[5D" backward-word
+
+# Bind Ctrl+Right to forward-word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[5C" forward-word
