@@ -30,14 +30,42 @@ alias grep='grep --color'
 alias tmux='tmux -u'
 alias ta='tmux attach-session'
 
+# spell check alias
+#alias spell='scspell'
+#alias spell-unstaged='git diff --name-only | grep yml | cut -c 5- | xargs -o scspell'
+#alias spell-staged='git diff --name-only --cached | grep yml | cut -c 5- | xargs -o scspell'
+#alias spell-lastcommit='git log -1 --name-only | grep .yml | cut -c 5- | xargs -o scspell'
+
+# work tools
+#alias dbt='pipenv run dbt --use-experimental-parser'
+#alias sqlfluff='pipenv run sqlfluff'
+#alias python='python3'
+#alias pip='pip3'
+#alias docker='podman'
+alias pipenv-list='for venv in ~/.local/share/virtualenvs/* ; do basename $venv; cat $venv/.project | sed "s/\(.*\)/\t\1\n/" ; done'
+
 # some git shortcuts
-#alias gs='git status'
+alias gs='git status'
 #alias gc='git commit -m'
 #alias ga='git add'
 
 
+# paths for python selection
+#path=('/Library/Frameworks/Python.framework/Versions/3.9/bin' $path)
+#PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
+#PATH="$PYTHON_BIN_PATH:$PATH"
+
+# path for vs code
+#PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
+
 # update the paths
 export PATH
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Applications/google-cloud-sdk/path.zsh.inc' ]; then . '/Applications/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Applications/google-cloud-sdk/completion.zsh.inc' ]; then . '/Applications/google-cloud-sdk/completion.zsh.inc'; fi
 
 # find out which distribution we are running on
 LFILE="/etc/*-release"
@@ -78,16 +106,19 @@ esac
 
 export STARSHIP_DISTRO="$ICON"
 
+# stuff for pyenv
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
 # Load starship
 eval "$(starship init zsh)"
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/root/google-cloud-sdk/path.zsh.inc' ]; then . '/root/google-cloud-sdk/path.zsh.inc'; fi
+# dbt autocomplete
+#autoload -U +X compinit && compinit
+#autoload -U +X bashcompinit && bashcompinit
+#source ~/.dbt-completion.bash
 
-# The next line enables shell command completion for gcloud.
-if [ -f '/root/google-cloud-sdk/completion.zsh.inc' ]; then . '/root/google-cloud-sdk/completion.zsh.inc'; fi
-
-# Keybindings 
 # Bind Ctrl+Left to backward-word
 bindkey "^[[1;5D" backward-word
 bindkey "^[[5D" backward-word
@@ -95,3 +126,6 @@ bindkey "^[[5D" backward-word
 # Bind Ctrl+Right to forward-word
 bindkey "^[[1;5C" forward-word
 bindkey "^[[5C" forward-word
+
+# Global insstalled version of the recode script
+export PATH="/root/recode/venv/bin:$PATH"
