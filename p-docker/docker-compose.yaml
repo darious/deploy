@@ -1,0 +1,580 @@
+services:
+
+
+## System Tools
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/config/p-docker/portainer:/data
+    ports:
+      - 8000:8000
+      - 9443:9443
+    networks:
+      - internal
+      - web
+
+
+
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /mnt/config/p-docker/nginx-proxy/data:/data
+      - /mnt/config/p-docker/nginx-proxy/letsencrypt:/etc/letsencrypt
+    networks:
+      - internal
+      - web
+
+
+
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: ip-vanish
+    cap_add:
+      - NET_ADMIN
+    # environment:
+    #   - VPNSP=ipvanish
+    #   - OPENVPN_USER=chris@darious.co.uk
+    #   - OPENVPN_PASSWORD=xxxxxxxx
+    #   - COUNTRY=United Kingdom
+    #   - EXTRA_SUBNETS=192.168.0.0/24
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn # or wireguard
+      - OPENVPN_USER=xxxxxxxx
+      - OPENVPN_PASSWORD=xxxxxxxx
+      - SERVER_COUNTRIES=United Kingdom
+      - EXTRA_SUBNETS=192.168.0.0/24
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+      - 9117:9117
+      - 34400:34400
+      - 9696:9696
+      - 9092:9092
+      - 6881:6881
+      - 6881:6881/udp
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+  tailon:
+    image: gvalkov/tailon
+    container_name: tailon
+    ports:
+      - "6970:8080"  # Expose Tailon web interface on port 8080
+    volumes:
+      - /mnt/config/p-docker/lazylib/log:/lazylib_all_logs
+      - /mnt/config/p-docker/prowlarr/logs:/prowlarr_all_logs
+      - /mnt/config/p-docker/radarr_all/logs:/radarr_all_logs
+      - /mnt/config/p-docker/sabnzbd/logs:/sabnzbd_all_logs
+      - /mnt/config/p-docker/sonarrv3/logs:/sonarrv3_logs
+    command: >
+      alias=LazyLibrarian,/lazylib_all_logs/lazylibrarian.log
+      alias=Prowlarr,/prowlarr_all_logs/prowlarr.txt
+      alias=Radarr,/radarr_all_logs/radarr.txt
+      alias=RadarrEncode,/radarr_all_logs/encode_and_upload.log
+      alias=Sabnzbd,/sabnzbd_all_logs/sabnzbd.log
+      alias=Sonarr,/sonarrv3_logs/sonarr.txt
+      alias=SonarrEncode,/sonarrv3_logs/encode_and_upload.log
+    environment:
+      - TAILON_PORT=8080  # Port Tailon will run on (default is 8080)
+      - TAILON_USERS=*  # Users allowed to access Tailon (default is "*", meaning everyone)
+    restart: unless-stopped
+
+
+  librespeed:
+    image: lscr.io/linuxserver/librespeed:latest
+    container_name: librespeed
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - PASSWORD=ThisIsASecret
+    volumes:
+      - /mnt/config/p-docker/librespeed:/config
+    ports:
+      - 8013:80
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  guacamole:
+    image: "oznu/guacamole"
+    container_name: "guacamole"
+    volumes:
+      - /mnt/config/p-docker/guacamole:/config
+    ports:
+        - "8085:8080"
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+## snibox
+  frontend:
+    image: snibox/nginx-puma:1.15.9
+    container_name: snibox-frontend
+    ports:
+      - "8002:80"
+    volumes:
+      - /mnt/config/p-docker/snibox/static-files:/var/www/html
+    depends_on:
+      - backend
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+  backend:
+    image: snibox/snibox:latest
+    container_name: snibox-backend
+    command: sh -c "rm -rf tmp/pids && ./bin/rails s -p 3000 -b '0.0.0.0'"
+    environment:
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_HOST: database
+      DB_PORT: 5432
+      FORCE_SSL: "False"
+      SECRET_KEY_BASE: docker
+    volumes:
+      - /mnt/config/p-docker/snibox/static-files:/app/public
+    depends_on:
+      - database
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+  database:
+    image: postgres:10.7-alpine
+    container_name: snibox-database
+    volumes:
+      - /mnt/config/p-docker/snibox/pg-data:/var/lib/postgresql/data
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+## Media tools
+  tautulli:
+    image: tautulli/tautulli
+    container_name: tautulli
+    restart: unless-stopped
+    volumes:
+    - /mnt/config/p-docker/tautulli:/config
+    environment:
+      - TZ=Europe/London
+      - PGID=100
+      - PUID=10006
+    ports:
+      - 8181:8181
+    networks:
+      - internal
+      - web
+
+
+
+  xteve:
+    image: dnsforge/xteve:latest
+    container_name: xteve
+    environment:
+      - TZ=Europe/London
+    volumes:
+      - /mnt/config/p-docker/xteve:/home/xteve/conf
+    restart: unless-stopped
+    depends_on:
+      - gluetun
+    network_mode: service:gluetun
+
+
+
+  calibre:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    volumes:
+        - /mnt/config/p-docker/calibre:/config
+        - type: volume
+          source: books
+          target: /books
+          volume:
+            nocopy: true
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Europe/London
+    ports:
+      - 6980:8080
+      - 6981:8081
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  navidrome:
+    container_name: "navidrome"
+    image: deluan/navidrome:latest
+    #user: 1000:1000 # should be owner of volumes
+    ports:
+      - "4533:4533"
+    restart: unless-stopped
+    environment:
+      # Optional: put your config options customization here. Examples:
+      ND_SCANSCHEDULE: 1h
+      ND_LOGLEVEL: info
+      ND_SESSIONTIMEOUT: 24h
+      ND_BASEURL: ""
+    volumes:
+      - /mnt/config/p-docker/navidrome:/data
+      - type: volume
+        source: music_lossless
+        target: /music
+        volume:
+          nocopy: true
+    networks:
+      - internal
+      - web
+
+
+
+  paperless-ng:
+    image: lscr.io/linuxserver/paperless-ng
+    container_name: paperless-ng
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /mnt/config/p-docker/paperless-ng:/config
+      - type: volume
+        source: documents_paperless
+        target: /data
+        volume:
+          nocopy: true
+    ports:
+      - 5070:8000
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+## Download Tools
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /mnt/config/p-docker/prowlarr/:/config
+    restart: unless-stopped
+    network_mode: service:gluetun
+
+
+
+  sabnzbd:
+    image: "linuxserver/sabnzbd"
+    container_name: "sabnzbd"
+    volumes:
+      - /mnt/config/p-docker/sabnzbd/:/config
+      - type: volume
+        source: downloads_usenet_pcie
+        target: /downloads_pcie
+        volume:
+          nocopy: true
+    ports:
+        - "6969:8080"
+        - "9090:9090"
+    environment:
+        - PGID=100
+        - PUID=10001
+        - TZ=Europe/London
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - WEBUI_PORT=9092
+    volumes:
+      - /mnt/config/p-docker/qbittorrent/:/config
+      - type: volume
+        source: downloads_qbit
+        target: /downloads
+        volume:
+          nocopy: true
+    restart: unless-stopped
+    network_mode: service:gluetun
+
+
+
+  sonarr:
+    image: "linuxserver/sonarr:latest"
+    container_name: "sonarr"
+    volumes:
+        - "/dev/rtc:/dev/rtc:ro"
+        - "/dockerpipe:/hostpipe"
+        - "/mnt/config/p-docker/sonarrv3/:/config"
+        - type: volume
+          source: downloads_qbit
+          target: /qbittorrent
+          volume:
+            nocopy: true
+        - type: volume
+          source: downloads_usenet_pcie
+          target: /downloads_pcie
+          volume:
+            nocopy: true
+        - type: volume
+          source: video2
+          target: /video
+          volume:
+            nocopy: true
+    environment:
+        - PGID=100
+        - PUID=10003
+        - TZ=Europe/London
+    ports:
+        - "7879:8989"
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  radarr-all:
+    image: "linuxserver/radarr"
+    container_name: "radarr_all"
+    volumes:
+        - "/dockerpipe:/hostpipe"
+        - "/mnt/config/p-docker/radarr_all/:/config"
+        - type: volume
+          source: downloads_qbit
+          target: /qbittorrent
+          volume:
+            nocopy: true
+        - type: volume
+          source: downloads_usenet_pcie
+          target: /downloads_pcie
+          volume:
+            nocopy: true
+        - type: volume
+          source: video2
+          target: /video2
+          volume:
+            nocopy: true
+    environment:
+      - PGID=100
+      - PUID=10004
+      - TZ=Europe/London
+    ports:
+        - "7878:7878"
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  radarr-4k:
+    image: "linuxserver/radarr"
+    container_name: "radarr_4k"
+    volumes:
+        - "/mnt/config/p-docker/radarr_4k/:/config"
+        - type: volume
+          source: downloads_qbit
+          target: /qbittorrent
+          volume:
+            nocopy: true
+        - type: volume
+          source: downloads_usenet_pcie
+          target: /downloads_pcie
+          volume:
+            nocopy: true
+        - type: volume
+          source: video2
+          target: /video2
+          volume:
+            nocopy: true
+    environment:
+      - PGID=100
+      - PUID=10004
+      - TZ=Europe/London
+    ports:
+        - "7898:7878"
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    volumes:
+        - "/mnt/config/p-docker/readarr/:/config"
+        - type: volume
+          source: downloads_qbit
+          target: /qbittorrent
+          volume:
+            nocopy: true
+        - type: volume
+          source: downloads_usenet_pcie
+          target: /downloads_pcie
+          volume:
+            nocopy: true
+        - type: volume
+          source: books
+          target: /books
+          volume:
+            nocopy: true
+    environment:
+        - PGID=100
+        - PUID=10003
+        - TZ=Europe/London
+    ports:
+        - "8787:8787"
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  lazylibrarian:
+    image: ghcr.io/linuxserver/lazylibrarian
+    container_name: lazylibrarian
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg #optional
+    volumes:
+        - "/mnt/config/p-docker/lazylib/:/config"
+        - type: volume
+          source: downloads_usenet_pcie
+          target: /downloads
+          volume:
+            nocopy: true
+        - type: volume
+          source: downloads_qbit
+          target: /qbittorrent
+          volume:
+            nocopy: true
+        - type: volume
+          source: books
+          target: /books
+          volume:
+            nocopy: true
+    ports:
+      - 5299:5299
+    networks:
+      - internal
+      - web
+    restart: unless-stopped
+
+
+
+  jdownloader-2:
+    image: jlesage/jdownloader-2
+    container_name: jdownloader
+    ports:
+      - "5800:5800"
+    volumes:
+      - "/mnt/config/p-docker/jdownloader/:/config"
+      - type: volume
+        source: downloads_jdownload
+        target: /output
+        volume:
+          nocopy: true
+    restart: unless-stopped
+
+
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+
+
+
+volumes:
+  downloads_usenet_pcie:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.235,nolock,soft,rw"
+      device: ":/data_pcie/share/downloads"
+
+  downloads_jdownload:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.235,nolock,soft,rw"
+      device: ":/data_hdd/share/downloads/jdownload/"
+
+  downloads_qbit:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.235,nolock,soft,rw"
+      device: ":/data_hdd/share/downloads/qbittorrent/"
+
+  books:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.202,nolock,soft,rw"
+      device: ":/volume1/documents/Books"
+
+  documents_paperless:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.202,nolock,soft,rw"
+      device: ":/volume1/documents/paperless"
+
+  music_lossless:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.202,nolock,soft,rw"
+      device: ":/volume1/music/lossless"
+
+  video2:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.0.202,nolock,soft,rw"
+      device: ":/volume1/video"
