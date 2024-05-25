@@ -6,6 +6,7 @@ PIPE=/dockerpipe
 if [[ ! -p $PIPE ]]; then
     rm -f $PIPE # Remove any existing file or directory with the same name
     mkfifo $PIPE
+    chmod 666 $PIPE
 fi
 
 # Log the script activity
