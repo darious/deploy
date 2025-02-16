@@ -127,5 +127,5 @@ bindkey "^[[5D" backward-word
 bindkey "^[[1;5C" forward-word
 bindkey "^[[5C" forward-word
 
-# Global insstalled version of the recode script
-export PATH="/root/recode/venv/bin:$PATH"
+# pretty
+neofetch
