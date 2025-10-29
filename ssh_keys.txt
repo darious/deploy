@@ -36,3 +36,6 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCr+QyHckyZIHlHE5OPjV/TmXkWTZOUtHFNKHBCTGau
 
 # q-automation
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILd29opPTNeMuwlIp+ndKf77pc6nqaOlYI+fS7rm6n1i root@q-automation
+
+# taichi linux
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGUZ+dLOwhy3meJnEcbGtKZOR2YJNTbv3R2UhtOq9eB3 darious@taichi
